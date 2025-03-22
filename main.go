@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
 	"github.com/gorilla/websocket"
+	"cursor-crash-backend/auth"
+	"cursor-crash-backend/database"
+	"cursor-crash-backend/models"
 )
 
 var upgrader = websocket.Upgrader{
@@ -34,14 +36,14 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 }
 
 func saveDocument(w http.ResponseWriter, r *http.Request) {
-	var doc Document
+	var doc models.Document
 	err := json.NewDecoder(r.Body).Decode(&doc)
 	if err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
 
-	DB.Create(&doc)
+	database.DB.Create(&doc)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(doc)
 }
@@ -50,12 +52,33 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "CursorCrash backend is running!")
 }
 
+
+func CORSMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		
+		// Handle preflight OPTIONS requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		
+		next.ServeHTTP(w, r)
+	})
+}
+
+
+
 func main() {
-	ConnectDatabase()
+	database.ConnectDatabase()
 	
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/ws", handleWebSocket)
 	http.HandleFunc("/save", saveDocument)
+	http.Handle("/api/register", CORSMiddleware(http.HandlerFunc(auth.RegisterHandler)))
+	http.Handle("/api/login", CORSMiddleware(http.HandlerFunc(auth.LoginHandler)))
 
 	fmt.Println("CursorCrash backend is running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
