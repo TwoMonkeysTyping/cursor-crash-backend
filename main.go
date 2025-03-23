@@ -1,14 +1,17 @@
 package main
 
 import (
+	"cursor-crash-backend/auth"
+	"cursor-crash-backend/database"
+	"cursor-crash-backend/docs"
+	"cursor-crash-backend/models"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+
 	"github.com/gorilla/websocket"
-	"cursor-crash-backend/auth"
-	"cursor-crash-backend/database"
-	"cursor-crash-backend/models"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 var upgrader = websocket.Upgrader{
@@ -71,14 +74,30 @@ func CORSMiddleware(next http.Handler) http.Handler {
 
 
 
+// @title           My API
+// @version         1.0
+// @description     This is a sample API using Swagger in Go.
+// @host           localhost:8080
+// @BasePath       /
 func main() {
 	database.ConnectDatabase()
 	
+
+	docs.SwaggerInfo.Title = "Swagger Example API"
+	docs.SwaggerInfo.Description = "This is a sample server using Go standard library."
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.BasePath = "/api"
+	docs.SwaggerInfo.Schemes = []string{"http", "https"}
+
 	http.HandleFunc("/", handler)
 	http.HandleFunc("/ws", handleWebSocket)
 	http.HandleFunc("/save", saveDocument)
 	http.Handle("/api/register", CORSMiddleware(http.HandlerFunc(auth.RegisterHandler)))
 	http.Handle("/api/login", CORSMiddleware(http.HandlerFunc(auth.LoginHandler)))
+
+	// Serve Swagger documentation
+	http.HandleFunc("/swagger/", httpSwagger.WrapHandler)
 
 	fmt.Println("CursorCrash backend is running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))

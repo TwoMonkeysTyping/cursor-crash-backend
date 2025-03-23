@@ -29,7 +29,18 @@ type RegisterResponse struct {
 	Message 		string `json:"message"`
 }
 
-
+// LoginHandler godoc
+// @Summary      User login
+// @Description  Authenticates a user with email and password
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body LoginRequest true "Login credentials"
+// @Success      200  {object}  LoginResponse
+// @Failure      400  {string}  string "Bad Request"
+// @Failure      401  {object}  LoginResponse
+// @Failure      405  {string}  string "Method Not Allowed"
+// @Router       /login [post]
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
@@ -70,6 +81,19 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 
 
+// RegisterHandler godoc
+// @Summary      User registration
+// @Description  Registers a new user with email and password
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        request body RegisterRequest true "Registration information"
+// @Success      201  {object}  RegisterResponse
+// @Failure      400  {string}  string "Bad Request"
+// @Failure      405  {string}  string "Method Not Allowed"
+// @Failure      409  {string}  string "Email already registered"
+// @Failure      500  {string}  string "Internal Server Error"
+// @Router       /register [post]
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
