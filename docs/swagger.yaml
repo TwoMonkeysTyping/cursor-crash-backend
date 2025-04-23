@@ -24,6 +24,35 @@ definitions:
       message:
         type: string
     type: object
+  main.DocumentInitRequest:
+    properties:
+      language:
+        type: string
+    type: object
+  main.DocumentInitResponse:
+    properties:
+      document:
+        $ref: '#/definitions/models.Document'
+      message:
+        type: string
+    type: object
+  models.Document:
+    properties:
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: string
+      isSaved:
+        type: boolean
+      language:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact: {}
@@ -31,6 +60,41 @@ info:
   title: My API
   version: "1.0"
 paths:
+  /documents:
+    post:
+      consumes:
+      - application/json
+      description: Initializes a new document with the selected language. A temporary
+        name is assigned ("Untitled").
+      parameters:
+      - description: Document language
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.DocumentInitRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.DocumentInitResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "405":
+          description: Method Not Allowed
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create a new document
+      tags:
+      - documents
   /login:
     post:
       consumes:

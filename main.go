@@ -96,8 +96,9 @@ func main() {
 	http.Handle("/api/register", CORSMiddleware(http.HandlerFunc(auth.RegisterHandler)))
 	http.Handle("/api/login", CORSMiddleware(http.HandlerFunc(auth.LoginHandler)))
 
+	http.Handle("/api/documents", CORSMiddleware(http.HandlerFunc(CreateDocumentHandler)))
 	// Serve Swagger documentation
-	http.HandleFunc("/swagger/", httpSwagger.WrapHandler)
+	http.Handle("/swagger/", httpSwagger.WrapHandler)
 
 	fmt.Println("CursorCrash backend is running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
